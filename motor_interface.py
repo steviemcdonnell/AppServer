@@ -1,28 +1,36 @@
 # Stephen McDonnell
 # 16/04/2019
 
+import curses
 from gpiozero import Robot
 
-grazeBot = Robot(left=(7, 8), right=(9, 10))
+grazeBot = Robot(left = (17, 18), right = (22, 23))
 
-class Motor_Interface:
+actions = {
+    curses.KEY_UP:       grazeBot .forward,
+    curses.KEY_DOWN:     grazeBot .backward,
+    curses.KEY_LEFT:     grazeBot .left,
+    curses.KEY_RIGHT:    grazeBot .right,
+    }
 
-    def __init__(self):
-        pass
-
-    def move(self):
-        if self.left:
-            grazeBot.forward()
-            print("Moving Forward\n")
-        elif self.right:
-            grazeBot.backward()
-            print("Reversing\n")
-        elif self.top:
-            grazeBot.right()
-            print("Turning Right\n")
-        elif self.bottom:
-            grazeBot.left()
-            print("Turning Left\n")
-
-    def stop(self):
-        grazeBot.stop()
+def Motor_Interface(window):
+    next_key = None
+    while True:
+        curses.halfdelay(1)
+        if next_key is None:
+            key = window.getch()
+        else:
+            key = next_key
+            next_key = None
+        if key != -1:
+            # Key pressed
+            curses.halfdelay(3)
+            action = actions.get(key)
+            if action is not None:
+                action()
+            next_key = key
+            while next_key == key:
+                next_key = window.getch()
+            # Key released
+            grazeBot .stop()
+curses.wrapper(Motor_Interface)

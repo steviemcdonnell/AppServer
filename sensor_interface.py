@@ -9,7 +9,6 @@ from ctypes import c_ubyte
 
 DEVICE = 0x76 # Default device I2C address
 
-
 class Sensor_Interface:
 
    # def __init__(self):

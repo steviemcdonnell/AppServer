@@ -4,7 +4,6 @@
 import random
 import time
 
-
 class GPS_Interface:
 
     def __init__(self):
