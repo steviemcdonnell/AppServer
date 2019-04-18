@@ -20,6 +20,7 @@ class Controller:
         self.temperature = None
         self.humidity = None
         self.movement = None
+        self.response = None
 
     # Unpack all json request variables into private member variables
     def unpack_request(self, request):
@@ -31,6 +32,7 @@ class Controller:
     # Build a response Dictionary for converting to JSON and sending back to the server
     def build_response(self):
         response = {
+            "response": self.response,
             "robot_latitude": self.latitude,
             "robot_longitude": self.longitude,
             "latitude_diff": self.latitude_diff,
@@ -62,6 +64,11 @@ class Controller:
         (self.latitude, self.longitude) = GPS_Interface().get_gps_reading()
         self.latitude_diff = self.latitude - float(self.app_latitude)
         self.longitude_diff = self.longitude - float(self.app_longitude)
+        self.response = "fetch_OK"
+
+    def test(self):
+        self.fetch()
+        self.response = "test_OK"
 
 
 
