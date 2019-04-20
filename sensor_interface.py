@@ -1,61 +1,80 @@
 # Stephen McDonnell
 # 16/04/2019
 
+# TEST
+# import random
+# import time
+
+## LIVE
 import smbus
 import time
 from ctypes import c_short
 from ctypes import c_byte
 from ctypes import c_ubyte
-
+#
 DEVICE = 0x76 # Default device I2C address
 
-class Sensor_Interface:
 
-   # def __init__(self):
-   #     self.temperature = 20.6
-   #     self.humidity = 50
+class SensorInterface:
 
-   # def get_sensor_readings(self):
-        # TO-DO
-        # Python Hardware calls here i.e. read SPI, I2C, UART, etc and get data
+    def __init__(self):
+        self.bus = smbus.SMBus(1)  # Rev 2 Pi, Pi 2 & Pi 3 uses bus 1
 
-        # Sudo number gen for testing
-    #    random.seed(time.time())
-    #    self.temperature = round(random.randint(-400, 1250) * 0.10, 2)
-    #    self.humidity = round(random.randint(0, 1000) * 0.10, 2)
-    #    return self.temperature, self.humidity
+        self.temperature = 20.6
+        self.pressure = 25.5
+        self.humidity = 50
 
-    bus = smbus.SMBus(1)  # Rev 2 Pi, Pi 2 & Pi 3 uses bus 1
+    ################################################################################################
+    ########################################## TEST CODE ###########################################
+    ################################################################################################
+    #
+    # def get_sensor_readings(self):
+    #     # TO-DO
+    #     # Python Hardware calls here i.e. read SPI, I2C, UART, etc and get data
+    #
+    #     # Sudo number gen for testing
+    #     random.seed(time.time())
+    #     self.temperature = round(random.randint(-400, 1250) * 0.10, 2)
+    #     self.pressure = round(random.randint(0, 1000) * 0.10, 2)
+    #     self.humidity = round(random.randint(0, 1000) * 0.10, 2)
+    #
+    #     return self.temperature, self.pressure, self.humidity
+    #
+    ################################################################################################
+    ########################################## LIVE CODE ###########################################
+    ################################################################################################
+
+
 
     # Rev 1 Pi uses bus 0
 
-    def getShort(data, index):
+    def getShort(self, data, index):
         # return two bytes from data as a signed 16-bit value
         return c_short((data[index + 1] << 8) + data[index]).value
 
-    def getUShort(data, index):
+    def getUShort(self, data, index):
         # return two bytes from data as an unsigned 16-bit value
         return (data[index + 1] << 8) + data[index]
 
-    def getChar(data, index):
+    def getChar(self, data, index):
         # return one byte from data as a signed char
         result = data[index]
         if result > 127:
             result -= 256
         return result
 
-    def getUChar(data, index):
+    def getUChar(self, data, index):
         # return one byte from data as an unsigned char
         result = data[index] & 0xFF
         return result
 
-    def readBME280ID(addr=DEVICE):
+    def readBME280ID(self, addr=DEVICE):
         # Chip ID Register Address
         REG_ID = 0xD0
-        (chip_id, chip_version) = bus.read_i2c_block_data(addr, REG_ID, 2)
+        (chip_id, chip_version) = self.bus.read_i2c_block_data(addr, REG_ID, 2)
         return (chip_id, chip_version)
 
-    def readBME280All(addr=DEVICE):
+    def readBME280All(self, addr=DEVICE):
         # Register Addresses
         REG_DATA = 0xF7
         REG_CONTROL = 0xF4
@@ -72,53 +91,53 @@ class Sensor_Interface:
 
         # Oversample setting for humidity register - page 26
         OVERSAMPLE_HUM = 2
-        bus.write_byte_data(addr, REG_CONTROL_HUM, OVERSAMPLE_HUM)
+        self.bus.write_byte_data(addr, REG_CONTROL_HUM, OVERSAMPLE_HUM)
 
         control = OVERSAMPLE_TEMP << 5 | OVERSAMPLE_PRES << 2 | MODE
-        bus.write_byte_data(addr, REG_CONTROL, control)
+        self.bus.write_byte_data(addr, REG_CONTROL, control)
 
         # Read blocks of calibration data from EEPROM
         # See Page 22 data sheet
-        cal1 = bus.read_i2c_block_data(addr, 0x88, 24)
-        cal2 = bus.read_i2c_block_data(addr, 0xA1, 1)
-        cal3 = bus.read_i2c_block_data(addr, 0xE1, 7)
+        cal1 = self.bus.read_i2c_block_data(addr, 0x88, 24)
+        cal2 = self.bus.read_i2c_block_data(addr, 0xA1, 1)
+        cal3 = self.bus.read_i2c_block_data(addr, 0xE1, 7)
 
         # Convert byte data to word values
-        dig_T1 = getUShort(cal1, 0)
-        dig_T2 = getShort(cal1, 2)
-        dig_T3 = getShort(cal1, 4)
+        dig_T1 = self.getUShort(cal1, 0)
+        dig_T2 = self.getShort(cal1, 2)
+        dig_T3 = self.getShort(cal1, 4)
 
-        dig_P1 = getUShort(cal1, 6)
-        dig_P2 = getShort(cal1, 8)
-        dig_P3 = getShort(cal1, 10)
-        dig_P4 = getShort(cal1, 12)
-        dig_P5 = getShort(cal1, 14)
-        dig_P6 = getShort(cal1, 16)
-        dig_P7 = getShort(cal1, 18)
-        dig_P8 = getShort(cal1, 20)
-        dig_P9 = getShort(cal1, 22)
+        dig_P1 = self.getUShort(cal1, 6)
+        dig_P2 = self.getShort(cal1, 8)
+        dig_P3 = self.getShort(cal1, 10)
+        dig_P4 = self.getShort(cal1, 12)
+        dig_P5 = self.getShort(cal1, 14)
+        dig_P6 = self.getShort(cal1, 16)
+        dig_P7 = self.getShort(cal1, 18)
+        dig_P8 = self.getShort(cal1, 20)
+        dig_P9 = self.getShort(cal1, 22)
 
-        dig_H1 = getUChar(cal2, 0)
-        dig_H2 = getShort(cal3, 0)
-        dig_H3 = getUChar(cal3, 2)
+        dig_H1 = self.getUChar(cal2, 0)
+        dig_H2 = self.getShort(cal3, 0)
+        dig_H3 = self.getUChar(cal3, 2)
 
-        dig_H4 = getChar(cal3, 3)
+        dig_H4 = self.getChar(cal3, 3)
         dig_H4 = (dig_H4 << 24) >> 20
-        dig_H4 = dig_H4 | (getChar(cal3, 4) & 0x0F)
+        dig_H4 = dig_H4 | (self.getChar(cal3, 4) & 0x0F)
 
-        dig_H5 = getChar(cal3, 5)
+        dig_H5 = self.getChar(cal3, 5)
         dig_H5 = (dig_H5 << 24) >> 20
-        dig_H5 = dig_H5 | (getUChar(cal3, 4) >> 4 & 0x0F)
+        dig_H5 = dig_H5 | (self.getUChar(cal3, 4) >> 4 & 0x0F)
 
-        dig_H6 = getChar(cal3, 6)
+        dig_H6 = self.getChar(cal3, 6)
 
         # Wait in ms (Datasheet Appendix B: Measurement time and current calculation)
         wait_time = 1.25 + (2.3 * OVERSAMPLE_TEMP) + ((2.3 * OVERSAMPLE_PRES) + 0.575) + (
-                    (2.3 * OVERSAMPLE_HUM) + 0.575)
+                (2.3 * OVERSAMPLE_HUM) + 0.575)
         time.sleep(wait_time / 1000)  # Wait the required time
 
         # Read temperature/pressure/humidity
-        data = bus.read_i2c_block_data(addr, REG_DATA, 8)
+        data = self.bus.read_i2c_block_data(addr, REG_DATA, 8)
         pres_raw = (data[0] << 12) | (data[1] << 4) | (data[2] >> 4)
         temp_raw = (data[3] << 12) | (data[4] << 4) | (data[5] >> 4)
         hum_raw = (data[6] << 8) | data[7]
@@ -148,7 +167,7 @@ class Sensor_Interface:
         # Refine humidity
         humidity = t_fine - 76800.0
         humidity = (hum_raw - (dig_H4 * 64.0 + dig_H5 / 16384.0 * humidity)) * (
-                    dig_H2 / 65536.0 * (1.0 + dig_H6 / 67108864.0 * humidity * (1.0 + dig_H3 / 67108864.0 * humidity)))
+                dig_H2 / 65536.0 * (1.0 + dig_H6 / 67108864.0 * humidity * (1.0 + dig_H3 / 67108864.0 * humidity)))
         humidity = humidity * (1.0 - dig_H1 * humidity / 524288.0)
         if humidity > 100:
             humidity = 100
@@ -157,24 +176,16 @@ class Sensor_Interface:
 
         return temperature / 100.0, pressure / 100.0, humidity
 
-    def main():
+    def get_sensor_readings(self):
 
-        (chip_id, chip_version) = readBME280ID()
-        print
-        "Chip ID     :", chip_id
-        print
-        "Version     :", chip_version
+        (chip_id, chip_version) = self.readBME280ID()
+        print("Chip ID     :", chip_id)
+        print("Version     :", chip_version)
 
-        temperature, pressure, humidity = readBME280All()
+        self.temperature, self.pressure, self.humidity = self.readBME280All()
 
-        print
-        "Temperature : ", temperature, "C"
-        print
-        "Pressure : ", pressure, "hPa"
-        print
-        "Humidity : ", humidity, "%"
+        print("Temperature : ", self.temperature, "C")
+        print("Pressure : ", self.pressure, "hPa")
+        print("Humidity : ", self.humidity, "%")
 
-    if __name__ == "__main__":
-        main()
-
-
+        return self.temperature, self.pressure, self.humidity
