@@ -1,7 +1,7 @@
 # Stephen McDonnell
 # 16/04/2019
 
-from sensor_interface import Sensor_Interface
+from sensor_interface import SensorInterface
 from gps_interface import GPS_Interface
 from motor_interface import Motor_Interface
 
