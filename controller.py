@@ -2,14 +2,14 @@
 # 16/04/2019
 
 from sensor_interface import SensorInterface
-from gps_interface import GPS_Interface
-from motor_interface import Motor_Interface
-
+from gps_interface import GPSInterface
+from motor_interface import MotorInterface
 
 class Controller:
 
     def __init__(self):
         self.request = None
+        self.queue = None
         self.command = None
         self.app_latitude = None
         self.app_longitude = None
@@ -18,6 +18,7 @@ class Controller:
         self.latitude_diff = None
         self.longitude_diff = None
         self.temperature = None
+        self.pressure = None
         self.humidity = None
         self.movement = None
         self.response = None
@@ -38,13 +39,15 @@ class Controller:
             "latitude_diff": self.latitude_diff,
             "longitude_diff": self.longitude_diff,
             "temperature": self.temperature,
+            "pressure": self.pressure,
             "humidity": self.humidity
         }
         return response
 
     # Entry Point
-    def execute_request(self, request):
+    def execute_request(self, request, queue):
         self.unpack_request(request)
+        self.queue = queue
         self.command_to_operation_translation()
         return self.build_response()
 
@@ -56,19 +59,26 @@ class Controller:
         # Get the method from self. Default to lambda if command not recognised
         method = getattr(self, method_name, lambda: "Invalid Command")
         # Call the method as it is returned
-        method()
+        print(method())
 
     # Update information to send back to the server.
     def fetch(self):
-        (self.temperature, self.humidity) = Sensor_Interface().get_sensor_readings()
-        (self.latitude, self.longitude) = GPS_Interface().get_gps_reading()
+        (self.temperature, self.pressure, self.humidity) = SensorInterface().get_sensor_readings()
+        (self.latitude, self.longitude) = GPSInterface().get_gps_reading()
         self.latitude_diff = self.latitude - float(self.app_latitude)
         self.longitude_diff = self.longitude - float(self.app_longitude)
         self.response = "fetch_OK"
+        return "Running fetch()"
+
+    def move(self):
+        self.queue.put(self.movement)
+        self.fetch()
+        return "Running move()"
 
     def test(self):
         self.fetch()
         self.response = "test_OK"
+        return "Running test()"
 
 
 
