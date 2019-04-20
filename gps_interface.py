@@ -4,7 +4,8 @@
 import random
 import time
 
-class GPS_Interface:
+
+class GPSInterface:
 
     def __init__(self):
         self.latitute = None
@@ -19,4 +20,3 @@ class GPS_Interface:
         self.latitute = round(random.randint(-900, 900) * 0.10, 2)
         self.longitude = round(random.randint(-1800, 1800) * 0.10)
         return self.latitute, self.longitude
-
