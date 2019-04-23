@@ -15,8 +15,8 @@ class Controller:
         self.app_longitude = None
         self.latitude = None
         self.longitude = None
-        self.latitude_diff = None
-        self.longitude_diff = None
+        #self.latitude_diff = None
+        #self.longitude_diff = None
         self.temperature = None
         self.pressure = None
         self.humidity = None
@@ -65,8 +65,8 @@ class Controller:
     def fetch(self):
         (self.temperature, self.pressure, self.humidity) = SensorInterface().get_sensor_readings()
         (self.latitude, self.longitude) = GPSInterface().get_gps_reading()
-        self.latitude_diff = self.latitude - float(self.app_latitude)
-        self.longitude_diff = self.longitude - float(self.app_longitude)
+        #self.latitude_diff = self.latitude - float(self.app_latitude)
+        #self.longitude_diff = self.longitude - float(self.app_longitude)
         self.response = "fetch_OK"
         return "Running fetch()"
 
