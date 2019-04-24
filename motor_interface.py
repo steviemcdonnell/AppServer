@@ -1,9 +1,7 @@
 # Stephen McDonnell
-# 16/04/2019
+# 24/04/2019
 
-# from gpiozero import Robot
 import RPi.GPIO as gpio
-#from mock_robot import Robot            # COMMENT ME
 from multiprocessing import Process, Queue, Pipe
 import time
 
@@ -12,7 +10,6 @@ class MotorInterface(Process):
     def __init__(self, queue):
         super().__init__()
         self.queue = queue
-        #self.graze_bot = Robot(left=(17, 18), right=(22, 23))
         self.movement = "still"
         self.ML_1 = 18
         self.ML_2 = 17

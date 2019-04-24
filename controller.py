@@ -1,25 +1,24 @@
 # Stephen McDonnell
-# 16/04/2019
+# 24/04/2019
 
 from sensor_interface import SensorInterface
 from gps_interface import GPSInterface
-from motor_interface import MotorInterface
 
 class Controller:
 
     def __init__(self):
         self.request = None
-        self.queue = None
+        self.motor_queue = None
+        self.gps_queue = None
+        self.sql_interface = None
         self.command = None
         self.app_latitude = None
         self.app_longitude = None
         self.latitude = None
         self.longitude = None
-        #self.latitude_diff = None
-        #self.longitude_diff = None
-        self.temperature = None
-        self.pressure = None
-        self.humidity = None
+        self.latitude_diff = None
+        self.longitude_diff = None
+        self.sensor_array = None
         self.movement = None
         self.response = None
 
@@ -38,16 +37,16 @@ class Controller:
             "robot_longitude": self.longitude,
             "latitude_diff": self.latitude_diff,
             "longitude_diff": self.longitude_diff,
-            "temperature": self.temperature,
-            "pressure": self.pressure,
-            "humidity": self.humidity
+            "sensor_array": self.sensor_array
         }
         return response
 
     # Entry Point
-    def execute_request(self, request, queue):
+    def execute_request(self, request, motor_queue, gps_queue, sql_interface):
         self.unpack_request(request)
-        self.queue = queue
+        self.motor_queue = motor_queue
+        self.gps_queue = gps_queue
+        self.sql_interface = sql_interface
         self.command_to_operation_translation()
         return self.build_response()
 
@@ -63,15 +62,15 @@ class Controller:
 
     # Update information to send back to the server.
     def fetch(self):
-        (self.temperature, self.pressure, self.humidity) = SensorInterface().get_sensor_readings()
-        (self.latitude, self.longitude) = GPSInterface().get_gps_reading()
-        #self.latitude_diff = self.latitude - float(self.app_latitude)
-        #self.longitude_diff = self.longitude - float(self.app_longitude)
+        self.sensor_array = self.sql_interface.query_all()
+        (self.latitude, self.longitude) = self.get_gps_reading()
+        self.latitude_diff = self.latitude - float(self.app_latitude)
+        self.longitude_diff = self.longitude - float(self.app_longitude)
         self.response = "fetch_OK"
         return "Running fetch()"
 
     def move(self):
-        self.queue.put(self.movement)
+        self.motor_queue.put(self.movement)
         self.fetch()
         return "Running move()"
 
@@ -80,8 +79,16 @@ class Controller:
         self.response = "test_OK"
         return "Running test()"
 
-
-
+    def get_gps_reading(self):
+        lat, long = -1, -1
+        try:
+            # remove items from the head of the queue
+            while not self.gps_queue.empty():
+                lat, long = self.gps_queue.get_nowait()
+                print("lat= {0} long= {1}".format(lat, long))
+        except Exception as e:
+            pass
+        return lat, long
 
 
 

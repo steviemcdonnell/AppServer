@@ -1,6 +1,7 @@
+# Stephen McDonnell
+# 24/04/2019
 
 import sqlite3
-import sys
 
 class SqliteInterface:
 
