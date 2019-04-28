@@ -6,6 +6,9 @@ from gps_interface import GPSInterface
 
 class Controller:
 
+    previous_lat = 0.00
+    previous_long = 0.00
+
     def __init__(self):
         self.request = None
         self.motor_queue = None
@@ -80,14 +83,16 @@ class Controller:
         return "Running test()"
 
     def get_gps_reading(self):
-        lat, long = -1, -1
+        (lat, long) = (Controller.previous_lat, Controller.previous_long)
         try:
             # remove items from the head of the queue
             while not self.gps_queue.empty():
                 lat, long = self.gps_queue.get_nowait()
-                print("lat= {0} long= {1}".format(lat, long))
         except Exception as e:
             pass
+        Controller.previous_lat = lat
+        Controller.previous_long = long
+
         return lat, long
 
 

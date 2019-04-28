@@ -1,9 +1,6 @@
 # Stephen McDonnell
 # 24/04/2019
 
-###############################################################################################
-######################################### LIVE CODE ###########################################
-###############################################################################################
 import smbus
 import time
 from ctypes import c_short
@@ -12,7 +9,7 @@ from ctypes import c_ubyte
 from multiprocessing import Process
 import os
 from sqlite_interface import SqliteInterface
-#
+
 DEVICE = 0x76 # Default device I2C address
 
 
@@ -167,60 +164,9 @@ class SensorInterface(Process):
     def get_sensor_readings(self):
 
         (chip_id, chip_version) = self.readBME280ID()
-        # print("Chip ID     :", chip_id)
-        # print("Version     :", chip_version)
 
         self.temperature, self.pressure, self.humidity = self.readBME280All()
 
-        # print("Temperature : ", self.temperature, "C")
-        # print("Pressure : ", self.pressure, "hPa")
-        # print("Humidity : ", self.humidity, "%")
         self.sql_interface.update([self.temperature, self.pressure, self.humidity])
-        # print(self.sql_interface.query_id(self.sql_interface.index - 1))
 
 
-# ###############################################################################################
-# ######################################### TEST CODE ###########################################
-# ###############################################################################################
-# import random
-# import time
-# from multiprocessing import Process
-# import os
-#
-# from sqlite_interface import SqliteInterface
-#
-#
-# class SensorInterface(Process):
-#
-#     def __init__(self):
-#         super().__init__()
-#         self.temperature = 20.6
-#         self.pressure = 25.5
-#         self.humidity = 50
-#         self.sql_interface = None
-#
-#
-#     def run(self):
-#         self.sql_interface = SqliteInterface(os.path.join(os.getcwd(), "database.db"), "SensorInterface")
-#         while True:
-#             self.get_sensor_readings()
-#             time.sleep(.1)
-#
-#     def get_sensor_readings(self):
-#         random.seed(time.time())
-#         self.temperature = round(random.randint(-400, 1250) * 0.10, 2)
-#         self.pressure = round(random.randint(0, 1000) * 0.10, 2)
-#         self.humidity = round(random.randint(0, 1000) * 0.10, 2)
-#         self.sql_interface.update([self.temperature, self.pressure, self.humidity])
-#         #print(self.sql_interface.query_id(self.sql_interface.index-1))
-#
-#         #return self.temperature, self.pressure, self.humidity
-#
-# if __name__ == '__main__':
-#     sql_interface = SqliteInterface(os.path.join(os.getcwd(), "database.db"), "Server")
-#     sensor_interface = SensorInterface()
-#     sensor_interface.daemon = True
-#     sensor_interface.start()
-#     while True:
-#         print(sql_interface.query_all())
-#         time.sleep(.5)

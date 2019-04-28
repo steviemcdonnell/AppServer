@@ -1,16 +1,17 @@
 # Stephen McDonnell
 # 24/04/2019
 
+import json
+import os
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from controller import Controller
-import json
 from multiprocessing import Queue, Process
 from motor_interface import MotorInterface
 from sensor_interface import SensorInterface
 from sqlite_interface import SqliteInterface
 from gps_interface import GPSInterface
 from sys import argv
-import os
 
 motor_interface = None
 motor_queue = None
@@ -61,11 +62,14 @@ if __name__ == "__main__":
     motor_interface = MotorInterface(motor_queue)
     motor_interface.daemon = True
     motor_interface.start()
+
     # GPS Setup
     gps_queue = Queue()
     gps_interface = GPSInterface(gps_queue)
     gps_interface.daemon = True
     gps_interface.start()
+
+    # Sensor Setup
     sql_interface = SqliteInterface(os.path.join(os.getcwd(), "database.db"), "Server")
     sensor_interface = SensorInterface()
     sensor_interface.daemon = True
